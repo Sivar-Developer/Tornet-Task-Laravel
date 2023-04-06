@@ -20,5 +20,5 @@ Route::get('posts', [PostController::class, 'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // Category Controller
-    Route::resource('category', CategoryController::class);
+    Route::apiResource('categories', CategoryController::class);
 });

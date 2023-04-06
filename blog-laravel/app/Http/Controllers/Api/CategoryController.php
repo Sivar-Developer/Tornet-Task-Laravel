@@ -10,6 +10,11 @@ use App\Http\Requests\CategoryUpdateRequest;
 
 class CategoryController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -25,7 +30,20 @@ class CategoryController extends Controller
      */
     public function store(CategoryStoreRequest $request)
     {
-        //
+        $category = new Category;
+
+        $title = [
+            'en' => request('title_en'),
+            'ar' => request('title_ar'),
+            'ku' => request('title_ku')
+        ];
+
+        $category->setTranslations('title', $title);
+        $category->save();
+
+        $this->imageProcess($category, $request);
+
+        return response()->json($category, 201);
     }
 
     /**
@@ -33,7 +51,7 @@ class CategoryController extends Controller
      */
     public function show(Category $category)
     {
-        //
+        return response()->json($category, 200);
     }
 
     /**
@@ -41,7 +59,16 @@ class CategoryController extends Controller
      */
     public function update(CategoryUpdateRequest $request, Category $category)
     {
-        //
+        $title = [
+            'en' => request('title_en'),
+            'ar' => request('title_ar'),
+            'ku_sorani' => request('title_ku_sorani')
+        ];
+
+        $category->title = $title;
+        $category->save();
+
+        return response()->json($category, 200);
     }
 
     /**
@@ -49,6 +76,31 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
-        //
+        $category->delete();
+
+        return response()->json(null, 204);
+    }
+
+    private function imageProcess(Category $category, $request)
+    {
+        $date = Carbon::now()->format('Y-m-d');
+
+        if($request->hasFile('image'))
+        {
+            $file=request()->file('image');
+            // $name = $file->getClientOriginalName();
+            // $mime_type = $file->getClientMimeType();
+            // $extension = $file->guessClientExtension();
+            // $size = $file->getSize();
+            $filename=uniqid().'.'.$file->guessClientExtension();
+
+            $file->storePubliclyAs('uploads/categories/'.$date, $filename);
+
+            $category->update([
+                'image' => "{$filename}",
+            ]);
+        }
+
+        return;
     }
 }
