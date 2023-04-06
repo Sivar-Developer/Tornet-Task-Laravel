@@ -28,7 +28,7 @@ class PostUpdateRequest extends FormRequest
             'content_en' => 'required|max:255',
             'content_ar' => 'required|max:255',
             'content_ku' => 'required|max:255',
-            'category_id' => 'required',
+            'category_id' => 'required|exists:categories,id',
         ];
     }
 }
