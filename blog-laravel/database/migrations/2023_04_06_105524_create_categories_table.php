@@ -13,7 +13,15 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->text('title');
+            $table->text('image');
+        });
+
+        Schema::table('posts', function (Blueprint $table) {
+            $table->foreignId('category_id')->nullable()
+                ->constrained('categories')
+                ->onUpdate('cascade')
+                ->onDelete('set null');
         });
     }
 
@@ -22,6 +30,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('posts', function (Blueprint $table) {
+            $table->dropForeign(['category_id']);
+            $table->dropColumn('category_id');
+        });
         Schema::dropIfExists('categories');
     }
 };
