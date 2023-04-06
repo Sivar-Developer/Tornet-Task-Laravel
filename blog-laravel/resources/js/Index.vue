@@ -1,19 +1,30 @@
 <template>
-    <div class="container">
+    <div class="container mt-4 pt-4">
         <div class="row mt-4" v-if="!loggedIn">
             <div class="col-6 offset-3">
-                <form action="#" @submit.prevent="handleLogin">
-                    <h3>Login form</h3>
-                    <div class="form-row">
-                        <input type="email" name="email" v-model="formData.email" class="form-control" placeholder="Email Address">
+                <div class="card">
+                    <div class="card-body">
+                        <form action="#" @submit.prevent="handleLogin">
+                            <h3>Login form</h3>
+                            <div class="form-row">
+                                <input type="email" name="email" v-model="formData.email" class="form-control"
+                                    :class="{ 'is-invalid': authErrors?.errors?.email }" placeholder="Email Address">
+                                <div class="invalid-feedback" v-for="msg in authErrors?.errors?.email" v-text="msg"></div>
+                            </div>
+                            <div class="form-row">
+                                <input type="password" name="password" v-model="formData.password"
+                                    :class="{ 'is-invalid': authErrors?.errors?.password }" class="form-control"
+                                    placeholder="Password">
+                                <div class="invalid-feedback" v-for="msg in authErrors?.errors?.password" v-text="msg">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <button type="submit" class="btn btn-primary">Login</button>
+                                <button type="button" class="btn btn-link">Register?</button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="form-row">
-                        <input type="password" name="password" v-model="formData.password" class="form-control" placeholder="Password">
-                    </div>
-                    <div class="form-row">
-                        <button type="submit" class="btn btn-primary">Login</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
 
@@ -40,50 +51,54 @@
 
 <script>
 import { Bootstrap5Pagination } from 'laravel-vue-pagination';
-    export default {
-        components: {
-            Bootstrap5Pagination,
-        },
-        data() {
-            return {
-                headers: {},
-                posts: {},
-                loggedIn: false,
-                language: 'en',
-                formData: {
-                    email: '',
-                    password: '',
-                }
+export default {
+    components: {
+        Bootstrap5Pagination,
+    },
+    data() {
+        return {
+            language: 'en',
+            loggedIn: false,
+            headers: {},
+            posts: {},
+            authErrors: {},
+            formData: {
+                email: '',
+                password: '',
             }
-        },
-        methods: {
-            handleLogin() {
-                axios.get('/sanctum/csrf-cookie').then((response) => {
-                    axios.post('/api/login', this.formData).then((response) => {
-                        this.loggedIn = true
-                        const config = {
-                            headers: {
-                                'Accept': 'application/json',
-                                'Authorization': `Bearer ${response.data?.token}`
-                            }
+        }
+    },
+    methods: {
+        handleLogin() {
+            axios.get('/sanctum/csrf-cookie').then((response) => {
+                axios.post('/api/login', this.formData).then((response) => {
+                    this.loggedIn = true
+                    const config = {
+                        headers: {
+                            'Accept': 'application/json',
+                            'Authorization': `Bearer ${response.data?.token}`
                         }
-                        this.headers = config
-                        this.getPosts()
-                    }, () => this.loggedIn = false)
+                    }
+                    this.headers = config
+                    this.getPosts()
+                }, (errors) => {
+                    this.authErrors = errors.response?.data
+                    this.loggedIn = false
                 })
-            },
-            getPosts(page = 1) {
-                axios.get('/api/posts?page=' + page, this.headers).then((response) => {
-                    this.posts = response.data
-                    console.log(this.posts)
-                }, () => this.loggedIn = false)
-            },
+            })
         },
-    }
+        getPosts(page = 1) {
+            axios.get('/api/posts?page=' + page, this.headers).then((response) => {
+                this.posts = response.data
+                console.log(this.posts)
+            }, () => this.loggedIn = false)
+        },
+    },
+}
 </script>
 
 <style>
-    .form-row {
-        margin-bottom: 8px;
-    }
+.form-row {
+    margin-bottom: 8px;
+}
 </style>
