@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\PostStoreRequest;
 use App\Http\Requests\PostUpdateRequest;
-use Carbon\Carbon;
 
 class PostController extends Controller
 {
@@ -51,5 +50,26 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         //
+    }
+
+    private function imageProcess(Post $post, $request)
+    {
+        if($request->hasFile('image'))
+        {
+            $file=request()->file('image');
+            // $name = $file->getClientOriginalName();
+            // $mime_type = $file->getClientMimeType();
+            // $extension = $file->guessClientExtension();
+            // $size = $file->getSize();
+            $filename=uniqid().'.'.$file->guessClientExtension();
+
+            $file->storePubliclyAs('uploads/posts/', $filename, 'public');
+
+            $post->update([
+                'image' => "{$filename}",
+            ]);
+        }
+
+        return;
     }
 }

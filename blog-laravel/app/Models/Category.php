@@ -17,6 +17,12 @@ class Category extends Model
 
     public $translatable = ['title'];
 
+    protected $appends = ['imageUrl'];
+
+    public function getImageUrlAttribute() {
+        return config('app.url').'/storage/uploads/categories/'.$this->image;
+    }
+
     public function posts() {
         return $this->hasMany(Post::class);
     }

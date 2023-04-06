@@ -7,7 +7,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Requests\CategoryStoreRequest;
 use App\Http\Requests\CategoryUpdateRequest;
-use Carbon\Carbon;
 
 class CategoryController extends Controller
 {
@@ -84,8 +83,6 @@ class CategoryController extends Controller
 
     private function imageProcess(Category $category, $request)
     {
-        $date = Carbon::now()->format('Y-m-d');
-
         if($request->hasFile('image'))
         {
             $file=request()->file('image');
@@ -95,7 +92,7 @@ class CategoryController extends Controller
             // $size = $file->getSize();
             $filename=uniqid().'.'.$file->guessClientExtension();
 
-            $file->storePubliclyAs('uploads/categories/'.$date, $filename);
+            $file->storePubliclyAs('uploads/categories/', $filename, 'public');
 
             $category->update([
                 'image' => "{$filename}",
