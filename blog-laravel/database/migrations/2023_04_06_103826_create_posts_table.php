@@ -21,7 +21,7 @@ return new class extends Migration
             // the max 100 characters will be validated inside laravel validation class for each language.
             $table->text('title');
             $table->longText('content');
-            $table->text('image');
+            $table->text('image')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

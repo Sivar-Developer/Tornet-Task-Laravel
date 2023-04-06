@@ -13,6 +13,8 @@ class Category extends Model
 
     protected $guarded = [];
 
+    public $timestamps = false;
+
     public $translatable = ['title'];
 
     public function posts() {
