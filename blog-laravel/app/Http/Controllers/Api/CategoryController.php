@@ -20,7 +20,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $cateogries = Category::latest()->get();
+        $categories = Category::all();
 
         return response()->json($categories, 200);
     }
@@ -74,8 +74,14 @@ class CategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Category $category)
+    public function destroy($category)
     {
+        $category = Category::find($category);
+
+        if ($category == null) {
+            return response()->json(['error' => 'Not Found'], 404);
+        }
+
         $category->delete();
 
         return response()->json(null, 204);
