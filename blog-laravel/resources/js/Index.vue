@@ -7,6 +7,9 @@
                         <!-- Login Screen -->
                         <form v-if="screen == 'login'" action="#" @submit.prevent="handleLogin">
                             <h3>Login form</h3>
+                            <div class="form-row" v-if="loginAuthErrors?.message">
+                                <div class="alert alert-danger" role="alert" v-text="loginAuthErrors?.message"></div>
+                            </div>
                             <div class="form-row">
                                 <input type="email" name="email" v-model="loginFormData.email" class="form-control"
                                     :class="{ 'is-invalid': loginAuthErrors?.errors?.email }" placeholder="Email Address">
@@ -30,6 +33,9 @@
                         <!-- Register Screen -->
                         <form v-if="screen == 'register'" action="#" @submit.prevent="handleRegister">
                             <h3>Login form</h3>
+                            <div class="form-row" v-if="registerAuthErrors?.message">
+                                <div class="alert alert-danger" role="alert" v-text="registerAuthErrors?.message"></div>
+                            </div>
                             <div class="form-row">
                                 <input type="text" name="name" v-model="registerFormData.name" class="form-control"
                                     :class="{ 'is-invalid': registerAuthErrors?.errors?.name }" placeholder="Full Name">
@@ -73,12 +79,28 @@
         <!-- Posts Screen -->
         <div class="row mt-4" v-if="loggedIn">
             <div class="col-10 offset-1 mb-4">
+                <button type="button" class="btn btn-dark mr-5">Add Post</button>
                 <div class="btn-group" role="group" aria-label="Basic outlined example">
                     <button type="button" class="btn btn-outline-primary" v-on:click="language = 'en'">English</button>
                     <button type="button" class="btn btn-outline-primary" v-on:click="language = 'ar'">العربية</button>
                     <button type="button" class="btn btn-outline-primary" v-on:click="language = 'ku'">کوردی</button>
                 </div>
-                <button class="btn btn-dark float-end">Logout</button>
+                <button type="button" class="btn btn-light dropdown-toggle float-end" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                    Hi, <label v-text="this.user?.name"></label>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" v-on:click="handleLogout()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                class="bi bi-box-arrow-left" viewBox="0 0 16 16">
+                                <path fill-rule="evenodd"
+                                    d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z" />
+                                <path fill-rule="evenodd"
+                                    d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z" />
+                            </svg>
+                            Logout
+                        </a></li>
+                </ul>
             </div>
             <br>
             <div class="col-6 offset-1">
@@ -157,6 +179,7 @@ export default {
                 password: '',
                 password_confirmation: '',
             },
+            user: {},
             posts: {},
             categories: []
         }
@@ -166,6 +189,7 @@ export default {
             axios.get('/sanctum/csrf-cookie').then((response) => {
                 axios.post('/api/login', this.loginFormData).then((response) => {
                     this.loggedIn = true
+                    this.user = response.data?.user;
                     const config = {
                         headers: {
                             'Accept': 'application/json',
@@ -200,6 +224,25 @@ export default {
                 })
             })
         },
+        handleLogout() {
+            axios.get('/sanctum/csrf-cookie').then(() => {
+                axios.post('/api/logout', {}, this.headers).then(() => {
+                        this.loginFormData = {
+                            email: '',
+                            password: '',
+                        }
+                        this.registerFormData = {
+                            name: '',
+                            email: '',
+                            password: '',
+                            password_confirmation: '',
+                        }
+                        this.loggedIn = false
+                    },
+                    () => this.loggedIn = false
+                )
+            })
+        },
         getPosts(page = 1) {
             axios.get('/api/posts?page=' + page, this.headers).then((response) => {
                 this.posts = response.data
@@ -217,6 +260,11 @@ export default {
 }
 </script>
 
-<style>.form-row {
+<style>
+.form-row {
     margin-bottom: 8px;
+}
+
+.mr-5 {
+    margin-right: 5px;
 }</style>
