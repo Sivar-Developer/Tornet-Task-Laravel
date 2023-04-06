@@ -348,36 +348,29 @@ export default {
                 console.log(this.categories)
             }, () => this.loggedIn = false)
         },
-        addPost() {
-            axios.get('/sanctum/csrf-cookie').then(() => {
-                const formData = new FormData();
-                formData.append('title_en', this.addPostForm.title_en);
-                formData.append('title_ar', this.addPostForm.title_ar);
-                formData.append('title_ku', this.addPostForm.title_ku);
-                formData.append('content_en', this.addPostForm.content_en);
-                formData.append('content_ar', this.addPostForm.content_ar);
-                formData.append('content_ku', this.addPostForm.content_ku);
-                formData.append('category_id', this.addPostForm.category_id);
-                formData.append('image', this.$refs.imageInput.files[0]);
-                const headers = {
-                    'Content-Type': 'multipart/form-data',
-                    'Accept': 'application/json',
-                    'Authorization': this.token
+        async addPost() {
+            const formData = new FormData();
+            formData.append('title_en', this.addPostForm.title_en);
+            formData.append('title_ar', this.addPostForm.title_ar);
+            formData.append('title_ku', this.addPostForm.title_ku);
+            formData.append('content_en', this.addPostForm.content_en);
+            formData.append('content_ar', this.addPostForm.content_ar);
+            formData.append('content_ku', this.addPostForm.content_ku);
+            formData.append('category_id', this.addPostForm.category_id);
+            formData.append('image', this.$refs.imageInput.files[0]);
+            await axios.post('/api/posts', formData, this.headers).then(() => {
+                this.addPostForm = {
+                    title_en: '',
+                    title_ar: '',
+                    title_ku: '',
+                    content_en: '',
+                    content_ar: '',
+                    content_ku: '',
+                    category_id: null
                 }
-                axios.post('/api/posts', formData, headers).then(() => {
-                    this.addPostForm = {
-                        title_en: '',
-                        title_ar: '',
-                        title_ku: '',
-                        content_en: '',
-                        content_ar: '',
-                        content_ku: '',
-                        category_id: null
-                    }
-                    this.getPosts()
-                    this.getCategories()
-                }, () => {})
-            })
+                this.getPosts()
+                this.getCategories()
+            }, () => {})
         }
     },
 }
