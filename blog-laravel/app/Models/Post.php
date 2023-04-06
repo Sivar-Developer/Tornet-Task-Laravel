@@ -16,4 +16,12 @@ class Post extends Model
     protected $guarded = [];
 
     public $translatable = ['title'];
+
+    public function author() {
+        return $this->belongsTo(User::class, 'author_id');
+    }
+
+    public function category() {
+        return $this->belongsTo(Category::class);
+    }
 }

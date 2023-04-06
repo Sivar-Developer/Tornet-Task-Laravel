@@ -14,4 +14,8 @@ class Category extends Model
     protected $guarded = [];
 
     public $translatable = ['title'];
+
+    public function posts() {
+        return $this->hasMany(Post::class);
+    }
 }
