@@ -116,15 +116,15 @@
                                     </div>
                                     <label class="form-label" for="content">Content</label>
                                     <div class="form-floating mb-2">
-                                        <textarea name="content_en" class="form-control" v-model="addPostForm.title_ku" placeholder="English" id="content_en" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_en }"></textarea>
+                                        <textarea name="content_en" class="form-control" v-model="addPostForm.content_en" placeholder="English" id="content_en" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_en }"></textarea>
                                         <label for="content_en">English</label>
                                     </div>
                                     <div class="form-floating mb-2">
-                                        <textarea name="content_ar" class="form-control" v-model="addPostForm.title_ku" placeholder="العربية" id="content_ar" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_ar }"></textarea>
+                                        <textarea name="content_ar" class="form-control" v-model="addPostForm.content_ar" placeholder="العربية" id="content_ar" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_ar }"></textarea>
                                         <label for="content_ar">العربية</label>
                                     </div>
                                     <div class="form-floating mb-2">
-                                        <textarea name="content_ku" class="form-control" v-model="addPostForm.title_ku" placeholder="کوردی" id="content_ku" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_ku }"></textarea>
+                                        <textarea name="content_ku" class="form-control" v-model="addPostForm.content_ku" placeholder="کوردی" id="content_ku" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_ku }"></textarea>
                                         <label for="content_ku">کوردی</label>
                                     </div><br><br>
                                     <div class="form-row mb-5" v-if="this.categories">
@@ -136,7 +136,7 @@
                                     </div>
                                     <div class="form-row">
                                         <label class="form-label" for="imageFile">Image</label>
-                                        <input type="file" name="image" class="form-control" id="imageFile" />
+                                        <input type="file" name="image" ref="imageInput" class="form-control" />
                                     </div>
                                     <div class="form-row mt-5">
                                         <button type="submit" class="btn btn-primary">Create</button>
@@ -177,11 +177,18 @@
                 <h3 class="mb-4">My Posts</h3>
                 <div class="post" v-for="(post, index) in posts?.data" :key="post.id">
                     <div class="card mb-2">
+                        <img :src="post?.imageUrl" class="card-img-top" :alt="post?.title?.en">
                         <div class="card-body">
                             <h5 class="card-title" v-if="language == 'en'" v-text="post?.title?.en"></h5>
                             <h5 class="card-title" v-if="language == 'ar'" v-text="post?.title?.ar"></h5>
                             <h5 class="card-title" v-if="language == 'ku'" v-text="post?.title?.ku"></h5>
-                            <p class="card-text" v-text="post?.created_at"></p>
+                            <p class="card-text" v-if="language == 'en'" v-text="post?.content?.en"></p>
+                            <p class="card-text" v-if="language == 'ar'" v-text="post?.content?.ar"></p>
+                            <p class="card-text" v-if="language == 'ku'" v-text="post?.content?.ku"></p>
+                            <small class="card-text"><b>Created At:</b> </small>
+                            <small class="card-text" v-text="post?.created_at"></small><br>
+                            <small class="card-text"><b>Updated At:</b> </small>
+                            <small class="card-text" v-text="post?.updated_at"></small><br>
                             <div class="btn-group me-2" role="group" aria-label="First group">
                                 <button type="button" class="btn btn-light">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -236,6 +243,7 @@ export default {
             language: 'en',
             loggedIn: false,
             screen: 'login',
+            token: '',
             headers: {},
             loginAuthErrors: {},
             registerAuthErrors: {},
@@ -259,7 +267,6 @@ export default {
                 content_ar: '',
                 content_ku: '',
                 category_id: null,
-                image: null,
             },
             addPostFormErrors: {},
             categories: [],
@@ -273,10 +280,11 @@ export default {
                     this.user = response.data?.user;
                     const config = {
                         headers: {
-                            'Accept': 'application/json',
-                            'Authorization': `Bearer ${response.data?.token}`
+                            Accept: 'application/json',
+                            Authorization: `Bearer ${response.data?.token}`
                         }
                     }
+                    this.token = `Bearer ${response.data?.token}`
                     this.headers = config
                     this.getCategories()
                     this.getPosts()
@@ -292,10 +300,11 @@ export default {
                     this.loggedIn = true
                     const config = {
                         headers: {
-                            'Accept': 'application/json',
-                            'Authorization': `Bearer ${response.data?.token}`
+                            Accept: 'application/json',
+                            Authorization: `Bearer ${response.data?.token}`
                         }
                     }
+                    this.token = `Bearer ${response.data?.token}`
                     this.headers = config
                     this.getCategories()
                     this.getPosts()
@@ -338,20 +347,35 @@ export default {
             }, () => this.loggedIn = false)
         },
         addPost() {
-            axios.post('/api/posts', this.addPostForm, this.headers).then(() => {
-                this.addPostForm = {
-                    title_en: '',
-                    title_ar: '',
-                    title_ku: '',
-                    content_en: '',
-                    content_ar: '',
-                    content_ku: '',
-                    category_id: null,
-                    image: null,
+            axios.get('/sanctum/csrf-cookie').then(() => {
+                const formData = new FormData();
+                formData.append('title_en', this.addPostForm.title_en);
+                formData.append('title_ar', this.addPostForm.title_ar);
+                formData.append('title_ku', this.addPostForm.title_ku);
+                formData.append('content_en', this.addPostForm.content_en);
+                formData.append('content_ar', this.addPostForm.content_ar);
+                formData.append('content_ku', this.addPostForm.content_ku);
+                formData.append('category_id', this.addPostForm.category_id);
+                formData.append('image', this.$refs.imageInput.files[0]);
+                const headers = {
+                    'Content-Type': 'multipart/form-data',
+                    'Accept': 'application/json',
+                    'Authorization': this.token
                 }
-                this.getPosts()
-                this.getCategories()
-            }, () => this.loggedIn = false)
+                axios.post('/api/posts', formData, headers).then(() => {
+                    this.addPostForm = {
+                        title_en: '',
+                        title_ar: '',
+                        title_ku: '',
+                        content_en: '',
+                        content_ar: '',
+                        content_ku: '',
+                        category_id: null
+                    }
+                    this.getPosts()
+                    this.getCategories()
+                }, () => {})
+            })
         }
     },
 }

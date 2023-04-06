@@ -24,7 +24,7 @@ class PostController extends Controller
             ->with('category')
             ->where('author_id', auth('sanctum')->id())
             ->latest()
-            ->paginate(2);
+            ->paginate(5);
 
         return response()->json($posts, 200);
     }
