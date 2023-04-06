@@ -23,13 +23,13 @@ Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout']);
 
 // Post Controller
-Route::apiResource('posts', [PostController::class, 'index'])->only(['index','show']);
+Route::apiResource('posts', PostController::class)->only(['index','show']);
 
 Route::middleware('auth:sanctum')->group(function () {
     // Category Controller
     Route::apiResource('categories', CategoryController::class);
 
     // Post Controller
-    Route::apiResource('posts', [PostController::class, 'index'])->except(['index','show']);
+    Route::apiResource('posts', PostController::class)->except(['index','show']);
 });
 

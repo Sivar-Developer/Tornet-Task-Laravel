@@ -15,7 +15,13 @@ class Post extends Model
 
     protected $guarded = [];
 
-    public $translatable = ['title'];
+    public $translatable = ['title','content'];
+
+    protected $appends = ['imageUrl'];
+
+    public function getImageUrlAttribute() {
+        return config('app.url').'/storage/uploads/posts/'.$this->image;
+    }
 
     public function author() {
         return $this->belongsTo(User::class, 'author_id');

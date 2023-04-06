@@ -87,6 +87,9 @@ class CategoryController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * Private image upload class
+    **/
     private function imageProcess(Category $category, $request)
     {
         if($request->hasFile('image'))
@@ -104,7 +107,6 @@ class CategoryController extends Controller
                 'image' => "{$filename}",
             ]);
         }
-
         return;
     }
 }

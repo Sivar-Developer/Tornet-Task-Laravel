@@ -20,7 +20,10 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::latest()->paginate(10);
+        $posts = Post::with('author')
+            ->with('category')
+            ->latest()
+            ->paginate(10);
 
         return response()->json($posts, 200);
     }
@@ -30,7 +33,29 @@ class PostController extends Controller
      */
     public function store(PostStoreRequest $request)
     {
-        //
+        $post = new Post;
+
+        $title = [
+            'en' => request('title_en'),
+            'ar' => request('title_ar'),
+            'ku' => request('title_ku')
+        ];
+
+        $content = [
+            'en' => request('content_en'),
+            'ar' => request('content_ar'),
+            'ku' => request('content_ku')
+        ];
+
+        $post->setTranslations('title', $title);
+        $post->setTranslations('content', $content);
+        $post->category_id = request('category_id');
+        $post->author_id = auth('sanctum')->id();
+        $post->save();
+
+        $this->imageProcess($post, $request);
+
+        return response()->json($post, 201);
     }
 
     /**
@@ -38,7 +63,9 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        //
+        $post->load('category');
+        $post->load('author');
+        return response()->json($post, 200);
     }
 
     /**
@@ -46,35 +73,50 @@ class PostController extends Controller
      */
     public function update(PostUpdateRequest $request, Post $post)
     {
-        //
+        $title = [
+            'en' => request('title_en'),
+            'ar' => request('title_ar'),
+            'ku' => request('title_ku')
+        ];
+
+        $content = [
+            'en' => request('content_en'),
+            'ar' => request('content_ar'),
+            'ku' => request('content_ku')
+        ];
+
+        $post->title = $title;
+        $post->content = $content;
+        $post->category_id = request('category_id');
+        $post->save();
+
+        return response()->json($post, 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Post $post)
+    public function destroy($post)
     {
-        //
+        $post = Post::find($post);
+        if ($post == null) { return response()->json(['error' => 'Not Found'], 404); }
+        $post->delete();
+
+        return response()->json(null, 204);
     }
 
+    /**
+     * Private image upload class
+    **/
     private function imageProcess(Post $post, $request)
     {
         if($request->hasFile('image'))
         {
             $file=request()->file('image');
-            // $name = $file->getClientOriginalName();
-            // $mime_type = $file->getClientMimeType();
-            // $extension = $file->guessClientExtension();
-            // $size = $file->getSize();
             $filename=uniqid().'.'.$file->guessClientExtension();
-
             $file->storePubliclyAs('uploads/posts/', $filename, 'public');
-
-            $post->update([
-                'image' => "{$filename}",
-            ]);
+            $post->update(['image' => "{$filename}",]);
         }
-
         return;
     }
 }
