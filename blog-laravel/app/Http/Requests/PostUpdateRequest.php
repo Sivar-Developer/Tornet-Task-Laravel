@@ -24,10 +24,10 @@ class PostUpdateRequest extends FormRequest
         return [
             'title_en' => 'required|max:100',
             'title_ar' => 'required|max:100',
-            'title_ku_sorani' => 'required|max:100',
+            'title_ku' => 'required|max:100',
             'content_en' => 'required|max:255',
             'content_ar' => 'required|max:255',
-            'content_ku_sorani' => 'required|max:255',
+            'content_ku' => 'required|max:255',
             'category_id' => 'required',
         ];
     }

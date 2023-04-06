@@ -24,7 +24,7 @@ class CategoryUpdateRequest extends FormRequest
         return [
             'title_en' => 'required|max:100',
             'title_ar' => 'required|max:100',
-            'title_ku_sorani' => 'required|max:100',
+            'title_ku' => 'required|max:100',
         ];
     }
 }

@@ -62,7 +62,7 @@ class CategoryController extends Controller
         $title = [
             'en' => request('title_en'),
             'ar' => request('title_ar'),
-            'ku_sorani' => request('title_ku_sorani')
+            'ku' => request('title_ku')
         ];
 
         $category->title = $title;
