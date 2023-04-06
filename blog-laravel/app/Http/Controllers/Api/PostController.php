@@ -23,7 +23,7 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(PostStoreRequest $request)
     {
         //
     }
@@ -39,7 +39,7 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(PostStoreRequest $request, Post $post)
+    public function update(PostUpdateRequest $request, Post $post)
     {
         //
     }
