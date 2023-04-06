@@ -79,12 +79,80 @@
         <!-- Posts Screen -->
         <div class="row mt-4" v-if="loggedIn">
             <div class="col-10 offset-1 mb-4">
-                <button type="button" class="btn btn-dark mr-5">Add Post</button>
+                <!-- Add Post Modal -->
+                <button type="button" class="btn btn-dark mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Add Post
+                </button>
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Post</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="#" @submit.prevent="addPost">
+                                    <label class="form-label" for="Title">Title</label>
+                                    <div class="form-row" v-if="addPostFormErrors?.message">
+                                        <div class="alert alert-danger" role="alert" v-text="addPostFormErrors?.message"></div>
+                                    </div>
+                                    <div class="form-row">
+                                        <input type="title_en" name="title_en" v-model="addPostForm.title_en" class="form-control"
+                                            :class="{ 'is-invalid': addPostFormErrors?.errors?.title_en }" placeholder="English">
+                                        <div class="invalid-feedback" v-for="msg in addPostFormErrors?.errors?.title_en" v-text="msg">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <input type="title_ar" name="title_ar" v-model="addPostForm.title_ar" class="form-control"
+                                            :class="{ 'is-invalid': addPostFormErrors?.errors?.title_ar }" placeholder="العربية">
+                                        <div class="invalid-feedback" v-for="msg in addPostFormErrors?.errors?.title_ar" v-text="msg">
+                                        </div>
+                                    </div>
+                                    <div class="form-row mb-5">
+                                        <input type="title_ku" name="title_ku" v-model="addPostForm.title_ku" class="form-control"
+                                            :class="{ 'is-invalid': addPostFormErrors?.errors?.title_ku }" placeholder="کوردی">
+                                        <div class="invalid-feedback" v-for="msg in addPostFormErrors?.errors?.title_ku" v-text="msg">
+                                        </div>
+                                    </div>
+                                    <label class="form-label" for="content">Content</label>
+                                    <div class="form-floating mb-2">
+                                        <textarea name="content_en" class="form-control" v-model="addPostForm.title_ku" placeholder="English" id="content_en" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_en }"></textarea>
+                                        <label for="content_en">English</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <textarea name="content_ar" class="form-control" v-model="addPostForm.title_ku" placeholder="العربية" id="content_ar" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_ar }"></textarea>
+                                        <label for="content_ar">العربية</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <textarea name="content_ku" class="form-control" v-model="addPostForm.title_ku" placeholder="کوردی" id="content_ku" :class="{ 'is-invalid': addPostFormErrors?.errors?.content_ku }"></textarea>
+                                        <label for="content_ku">کوردی</label>
+                                    </div><br><br>
+                                    <div class="form-row mb-5" v-if="this.categories">
+                                        <label class="form-label" for="category_id mb-2">Category</label><br>
+                                        <select name="category_id" v-model="addPostForm.category_id" class="form-select" aria-label="Default select example">
+                                            <option selected disabled></option>
+                                            <option v-for="category in this.categories" :value="category?.id" v-text="this.language == 'en' ? category?.title?.en : (this.language == 'ar' ? category?.title?.ar : category?.title?.ku)"></option>
+                                        </select>
+                                    </div>
+                                    <div class="form-row">
+                                        <label class="form-label" for="imageFile">Image</label>
+                                        <input type="file" name="image" class="form-control" id="imageFile" />
+                                    </div>
+                                    <div class="form-row mt-5">
+                                        <button type="submit" class="btn btn-primary">Create</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="btn-group" role="group" aria-label="Basic outlined example">
                     <button type="button" class="btn btn-outline-primary" v-on:click="language = 'en'">English</button>
                     <button type="button" class="btn btn-outline-primary" v-on:click="language = 'ar'">العربية</button>
                     <button type="button" class="btn btn-outline-primary" v-on:click="language = 'ku'">کوردی</button>
                 </div>
+
                 <button type="button" class="btn btn-light dropdown-toggle float-end" data-bs-toggle="dropdown"
                     aria-expanded="false">
                     Hi, <label v-text="this.user?.name"></label>
@@ -99,10 +167,12 @@
                                     d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z" />
                             </svg>
                             Logout
-                        </a></li>
+                        </a>
+                    </li>
                 </ul>
             </div>
             <br>
+
             <div class="col-6 offset-1">
                 <h3 class="mb-4">My Posts</h3>
                 <div class="post" v-for="(post, index) in posts?.data" :key="post.id">
@@ -181,7 +251,18 @@ export default {
             },
             user: {},
             posts: {},
-            categories: []
+            addPostForm: {
+                title_en: '',
+                title_ar: '',
+                title_ku: '',
+                content_en: '',
+                content_ar: '',
+                content_ku: '',
+                category_id: null,
+                image: null,
+            },
+            addPostFormErrors: {},
+            categories: [],
         }
     },
     methods: {
@@ -256,6 +337,22 @@ export default {
                 console.log(this.categories)
             }, () => this.loggedIn = false)
         },
+        addPost() {
+            axios.post('/api/posts', this.addPostForm, this.headers).then(() => {
+                this.addPostForm = {
+                    title_en: '',
+                    title_ar: '',
+                    title_ku: '',
+                    content_en: '',
+                    content_ar: '',
+                    content_ku: '',
+                    category_id: null,
+                    image: null,
+                }
+                this.getPosts()
+                this.getCategories()
+            }, () => this.loggedIn = false)
+        }
     },
 }
 </script>
