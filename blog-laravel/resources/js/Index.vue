@@ -175,6 +175,8 @@
 
             <div class="col-6 offset-1">
                 <h3 class="mb-4">My Posts</h3>
+                <Bootstrap5Pagination :data="posts" @pagination-change-page="getPosts" />
+                <div class="mb-2"></div>
                 <div class="post" v-for="(post, index) in posts?.data" :key="post.id">
                     <div class="card mb-2">
                         <img :src="post?.imageUrl" class="card-img-top" :alt="post?.title?.en">
