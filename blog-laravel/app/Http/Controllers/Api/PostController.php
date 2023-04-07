@@ -12,7 +12,7 @@ class PostController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:sanctum')->except(['index','show']);
+        $this->middleware('auth:sanctum')->except(['show']);
     }
 
     /**
@@ -22,8 +22,9 @@ class PostController extends Controller
     {
         $posts = Post::with('author')
             ->with('category')
+            ->where('author_id', auth('sanctum')->id())
             ->latest()
-            ->paginate(10);
+            ->paginate(5);
 
         return response()->json($posts, 200);
     }
