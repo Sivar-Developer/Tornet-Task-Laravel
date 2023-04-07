@@ -80,14 +80,15 @@
         <div class="row mt-4" v-if="loggedIn">
             <div class="col-10 offset-1 mb-4">
                 <!-- Add Post Modal -->
-                <button type="button" class="btn btn-dark mr-5" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <button type="button" class="btn btn-dark mr-5" data-bs-toggle="modal" data-bs-target="#addPostModal">
                     Add Post
                 </button>
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <!-- Add Post Modal -->
+                <div class="modal fade" id="addPostModal" tabindex="-1" aria-labelledby="addPostModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">Add Post</h1>
+                                <h1 class="modal-title fs-5" id="addPostModalLabel">Add Post</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
@@ -147,6 +148,67 @@
                     </div>
                 </div>
 
+                <!-- Update Post Modal -->
+                <div class="modal fade" id="updatePostModal" tabindex="-1" aria-labelledby="updatePostModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="updatePostModalLabel">Update Post</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="#" @submit.prevent="updatePost">
+                                    <label class="form-label" for="Title">Title</label>
+                                    <div class="form-row" v-if="updatePostFormErrors?.message">
+                                        <div class="alert alert-danger" role="alert" v-text="updatePostFormErrors?.message"></div>
+                                    </div>
+                                    <div class="form-row">
+                                        <input type="title_en" name="title_en" v-model="updatePostForm.title_en" class="form-control"
+                                            :class="{ 'is-invalid': updatePostFormErrors?.errors?.title_en }" placeholder="English">
+                                        <div class="invalid-feedback" v-for="msg in updatePostFormErrors?.errors?.title_en" v-text="msg">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <input type="title_ar" name="title_ar" v-model="updatePostForm.title_ar" class="form-control"
+                                            :class="{ 'is-invalid': updatePostFormErrors?.errors?.title_ar }" placeholder="العربية">
+                                        <div class="invalid-feedback" v-for="msg in updatePostFormErrors?.errors?.title_ar" v-text="msg">
+                                        </div>
+                                    </div>
+                                    <div class="form-row mb-5">
+                                        <input type="title_ku" name="title_ku" v-model="updatePostForm.title_ku" class="form-control"
+                                            :class="{ 'is-invalid': updatePostFormErrors?.errors?.title_ku }" placeholder="کوردی">
+                                        <div class="invalid-feedback" v-for="msg in updatePostFormErrors?.errors?.title_ku" v-text="msg">
+                                        </div>
+                                    </div>
+                                    <label class="form-label" for="content">Content</label>
+                                    <div class="form-floating mb-2">
+                                        <textarea name="content_en" class="form-control" v-model="updatePostForm.content_en" placeholder="English" id="content_en" :class="{ 'is-invalid': updatePostFormErrors?.errors?.content_en }"></textarea>
+                                        <label for="content_en">English</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <textarea name="content_ar" class="form-control" v-model="updatePostForm.content_ar" placeholder="العربية" id="content_ar" :class="{ 'is-invalid': updatePostFormErrors?.errors?.content_ar }"></textarea>
+                                        <label for="content_ar">العربية</label>
+                                    </div>
+                                    <div class="form-floating mb-2">
+                                        <textarea name="content_ku" class="form-control" v-model="updatePostForm.content_ku" placeholder="کوردی" id="content_ku" :class="{ 'is-invalid': updatePostFormErrors?.errors?.content_ku }"></textarea>
+                                        <label for="content_ku">کوردی</label>
+                                    </div><br><br>
+                                    <div class="form-row mb-5" v-if="this.categories">
+                                        <label class="form-label" for="category_id mb-2">Category</label><br>
+                                        <select name="category_id" v-model="updatePostForm.category_id" class="form-select" aria-label="Default select example">
+                                            <option selected disabled></option>
+                                            <option v-for="category in this.categories" :value="category?.id" v-text="this.language == 'en' ? category?.title?.en : (this.language == 'ar' ? category?.title?.ar : category?.title?.ku)"></option>
+                                        </select>
+                                    </div>
+                                    <div class="form-row mt-5">
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="btn-group" role="group" aria-label="Basic outlined example">
                     <button type="button" class="btn btn-outline-primary" v-on:click="language = 'en'">English</button>
                     <button type="button" class="btn btn-outline-primary" v-on:click="language = 'ar'">العربية</button>
@@ -192,7 +254,7 @@
                             <small class="card-text"><b>Updated At:</b> </small>
                             <small class="card-text" v-text="post?.updated_at"></small><br>
                             <div class="btn-group me-2" role="group" aria-label="First group">
-                                <button type="button" class="btn btn-light">
+                                <button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#updatePostModal" @click="setUpdatePostModalValue(post)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                         class="bi bi-pencil-square" viewBox="0 0 16 16">
                                         <path
@@ -270,7 +332,18 @@ export default {
                 content_ku: '',
                 category_id: null,
             },
+            updatePostForm: {
+                id: 0,
+                title_en: '',
+                title_ar: '',
+                title_ku: '',
+                content_en: '',
+                content_ar: '',
+                content_ku: '',
+                category_id: null,
+            },
             addPostFormErrors: {},
+            updatePostFormErrors: {},
             categories: [],
         }
     },
@@ -319,16 +392,7 @@ export default {
         handleLogout() {
             axios.get('/sanctum/csrf-cookie').then(() => {
                 axios.post('/api/logout', {}, this.headers).then(() => {
-                        this.loginFormData = {
-                            email: '',
-                            password: '',
-                        }
-                        this.registerFormData = {
-                            name: '',
-                            email: '',
-                            password: '',
-                            password_confirmation: '',
-                        }
+                        this.resetAuthForm()
                         this.loggedIn = false
                     },
                     () => this.loggedIn = false
@@ -359,18 +423,52 @@ export default {
             formData.append('category_id', this.addPostForm.category_id);
             formData.append('image', this.$refs.imageInput.files[0]);
             await axios.post('/api/posts', formData, this.headers).then(() => {
-                this.addPostForm = {
-                    title_en: '',
-                    title_ar: '',
-                    title_ku: '',
-                    content_en: '',
-                    content_ar: '',
-                    content_ku: '',
-                    category_id: null
-                }
+                this.resetAddPostForm()
                 this.getPosts()
                 this.getCategories()
             }, () => {})
+        },
+        async updatePost() {
+            await axios.patch('/api/posts/' + this.updatePostForm?.id, this.updatePostForm, this.headers).then(() => {
+                this.getPosts()
+                this.getCategories()
+            }, () => {})
+        },
+        resetAuthForm() {
+            this.loginFormData = {
+                email: '',
+                password: '',
+            }
+            this.registerFormData = {
+                name: '',
+                email: '',
+                password: '',
+                password_confirmation: '',
+            }
+        },
+        resetAddPostForm() {
+            this.addPostForm = {
+                title_en: '',
+                title_ar: '',
+                title_ku: '',
+                content_en: '',
+                content_ar: '',
+                content_ku: '',
+                category_id: null
+            }
+            this.$refs.imageInput.value = '';
+        },
+        setUpdatePostModalValue(post) {
+            this.updatePostForm = {
+                id: post?.id,
+                title_en: post?.title?.en,
+                title_ar: post?.title?.ar,
+                title_ku: post?.title?.ku,
+                content_en: post?.content?.en,
+                content_ar: post?.content?.ar,
+                content_ku: post?.content?.ku,
+                category_id: post?.category?.id,
+            }
         }
     },
 }
