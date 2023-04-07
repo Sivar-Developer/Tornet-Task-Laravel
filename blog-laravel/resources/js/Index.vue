@@ -263,7 +263,7 @@
                                             d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z" />
                                     </svg>
                                 </button>
-                                <button type="button" class="btn btn-light">
+                                <button type="button" class="btn btn-light" @click="deletePost(post?.id)">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                         class="bi bi-trash" viewBox="0 0 16 16">
                                         <path
@@ -434,6 +434,12 @@ export default {
                 this.getCategories()
             }, () => {})
         },
+        async deletePost(postId) {
+            await axios.delete('/api/posts/' + postId, this.headers).then(() => {
+                this.getPosts()
+                this.getCategories()
+            }, () => {})
+        },
         resetAuthForm() {
             this.loginFormData = {
                 email: '',
@@ -469,7 +475,7 @@ export default {
                 content_ku: post?.content?.ku,
                 category_id: post?.category?.id,
             }
-        }
+        },
     },
 }
 </script>
