@@ -60,7 +60,7 @@ class AuthController extends Controller
             'token' => $token,
         ];
 
-        return response()->json($response, 201);
+        return response()->json($response, 200);
     }
 
     // POST: /api/logout
@@ -70,6 +70,6 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logged out.'
-        ], 200);
+        ], 204);
     }
 }
