@@ -46,4 +46,15 @@ class PostsTest extends TestCase
         ]);
         $response->assertStatus(201);
     }
+
+    public function testGetAllPostsRelatedToUserWithSanctumAuthentication()
+    {
+        // Fake User
+        $user = User::factory()->create();
+
+        // Test Posts API Endpoint
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/posts');
+
+        $response->assertStatus(200);
+    }
 }
